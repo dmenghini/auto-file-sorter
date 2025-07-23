@@ -34,6 +34,17 @@ def move_file_to_target(file_path: Path, target_dir: Path):
     shutil.move(str(file_path), str(target_file_path))
 
 
+def remove_empty_dirs(base_dir: Path):
+    for root, dirs, _ in os.walk(base_dir, topdown=False):
+        for d in dirs:
+            dir_path = Path(root) / d
+            try:
+                dir_path.rmdir()
+                print(f"Removed empty directory: {dir_path}")
+            except OSError:
+                pass  # Directory not empty, skip
+
+
 def organize_files_by_extension(source_dir: str):
     """
     Organizes files in the source_dir (recursively) into subdirectories
@@ -58,3 +69,5 @@ def organize_files_by_extension(source_dir: str):
                 move_file_to_target(file_path, target_dir)
             except Exception as e:
                 print(f"Error moving {file_path}: {e}")
+
+    remove_empty_dirs(base_path)

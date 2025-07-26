@@ -10,6 +10,11 @@ def main():
         type=str,
         help="Path to the directory to organize"
     )
+    parser.add_argument(
+        "--recursive",
+        action="store_true",
+        help="Recursively sort files in all subdirectories (default: False)"
+    )
 
     args = parser.parse_args()
-    organize_files_by_extension(args.directory)
+    organize_files_by_extension(args.directory, recursive=args.recursive)

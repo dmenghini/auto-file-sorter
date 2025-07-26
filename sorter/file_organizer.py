@@ -45,22 +45,33 @@ def remove_empty_dirs(base_dir: Path):
                 pass  # Directory not empty, skip
 
 
-def organize_files_by_extension(source_dir: str):
+def organize_files_by_extension(source_dir: str, recursive: bool = False):
     """
-    Organizes files in the source_dir (recursively) into subdirectories
-    based on their file extensions.
+    Organizes files in the source_dir into subdirectories based on their file extensions.
+    If recursive is True, also sorts files from all subdirectories.
     """
     base_path = Path(source_dir)
 
     if not base_path.exists() or not base_path.is_dir():
         raise ValueError(f"Provided path '{source_dir}' is not a valid directory.")
 
-    for root, _, files in os.walk(source_dir):
+    if recursive:
+        # Walk through all subdirectories
+        walker = os.walk(source_dir)
+    else:
+        # Only list files in the top-level directory
+        walker = [(source_dir, [], os.listdir(source_dir))]
+
+    for root, _, files in walker:
         for file in files:
             file_path = Path(root) / file
 
+            if not file_path.is_file():
+                continue
+
+            # Skip already sorted files
             if file_path.parent.name == get_extension(file):
-                continue  # Skip already sorted files
+                continue
 
             ext = get_extension(file)
             target_dir = create_target_dir(base_path, ext)
@@ -69,5 +80,3 @@ def organize_files_by_extension(source_dir: str):
                 move_file_to_target(file_path, target_dir)
             except Exception as e:
                 print(f"Error moving {file_path}: {e}")
-
-    remove_empty_dirs(base_path)
